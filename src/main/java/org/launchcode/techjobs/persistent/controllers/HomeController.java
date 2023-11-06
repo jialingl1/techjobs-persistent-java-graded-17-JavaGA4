@@ -61,22 +61,18 @@ public class HomeController {
         if (errors.hasErrors()) {
 	    model.addAttribute("title", "Add Job");
             return "add";
-        } else {
-            Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
-            if (result.isPresent()) {
-                newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
-
-            if (skills != null) {
-                List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
-                newJob.setSkills(skillObjs);
-            }
-
-//                List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
-//                if (!(skillObjs.isEmpty())) {
-//                    newJob.setSkills(skillObjs);
-//                }
-            }
         }
+
+        if (skills != null) {
+            List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+            newJob.setSkills(skillObjs);
+        }
+
+        Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
+        if (result.isPresent()) {
+            newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
+        }
+
 
 //        Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
 //        if (result.isEmpty()) {
@@ -86,14 +82,6 @@ public class HomeController {
 //            newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
 //
 //        }
-//
-//        List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
-//        if (skillObjs.isEmpty()) {
-//            return "add";
-//        } else {
-//            newJob.setSkills(skillObjs);
-//        }
-
 
         jobRepository.save(newJob);
 
