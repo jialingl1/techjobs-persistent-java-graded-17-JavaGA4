@@ -3,9 +3,11 @@ package org.launchcode.techjobs.persistent.controllers;
 import jakarta.validation.Valid;
 import org.launchcode.techjobs.persistent.models.Employer;
 import org.launchcode.techjobs.persistent.models.Job;
+import org.launchcode.techjobs.persistent.models.Skill;
 import org.launchcode.techjobs.persistent.models.data.EmployerRepository;
 import org.launchcode.techjobs.persistent.models.data.JobRepository;
 import org.launchcode.techjobs.persistent.models.data.SkillRepository;
+import org.launchcode.techjobs.persistent.models.dto.JobSkillDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,24 +46,49 @@ public class HomeController {
 	model.addAttribute("title", "Add Job");
         model.addAttribute(new Job());
         model.addAttribute("employers", employerRepository.findAll());
+        model.addAttribute("skills", skillRepository.findAll());
+        //model.addAttribute("skills", new JobSkillDTO());
+
         return "add";
     }
 
     @PostMapping("add")
     public String processAddJobForm(@ModelAttribute @Valid Job newJob,
-                                       Errors errors, Model model, @RequestParam (required = false) int employerId) {
+                                       Errors errors, Model model, @RequestParam (required = false) int employerId,
+                                    @RequestParam (required = false) List<Integer> skills) {
 
         if (errors.hasErrors()) {
 	    model.addAttribute("title", "Add Job");
             return "add";
-        }
-        Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
-        if (result.isEmpty()) {
-            //model.addAttribute("title", "Invalid Employer ID: " + employerId);
-            return "add";
         } else {
-            newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
+            Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
+            if (!(result.isEmpty())) {
+                newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
+                List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+                if (!(skillObjs.isEmpty())) {
+                    newJob.setSkills(skillObjs);
+                }
+            }
         }
+
+//        Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
+//        if (result.isEmpty()) {
+//            //model.addAttribute("title", "Invalid Employer ID: " + employerId);
+//            return "add";
+//        } else {
+//            newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
+//
+//        }
+//
+//        List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+//        if (skillObjs.isEmpty()) {
+//            return "add";
+//        } else {
+//            newJob.setSkills(skillObjs);
+//        }
+
+
+
         jobRepository.save(newJob);
 
         return "redirect:";
