@@ -37,6 +37,7 @@ public class HomeController {
     public String index(Model model) {
 
         model.addAttribute("title", "MyJobs");
+        model.addAttribute("jobs", jobRepository.findAll()); //added to display all jobs
 
         return "index";
     }
@@ -62,12 +63,18 @@ public class HomeController {
             return "add";
         } else {
             Optional<Employer> result = employerRepository.findById(employerId); //"optional" is used as a required container to store results of findbyid.
-            if (!(result.isEmpty())) {
+            if (result.isPresent()) {
                 newJob.setEmployer(result.get()); // used setter from job class to link employer id results search to the job class
+
+            if (skills != null) {
                 List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
-                if (!(skillObjs.isEmpty())) {
-                    newJob.setSkills(skillObjs);
-                }
+                newJob.setSkills(skillObjs);
+            }
+
+//                List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+//                if (!(skillObjs.isEmpty())) {
+//                    newJob.setSkills(skillObjs);
+//                }
             }
         }
 
@@ -88,7 +95,6 @@ public class HomeController {
 //        }
 
 
-
         jobRepository.save(newJob);
 
         return "redirect:";
@@ -97,7 +103,17 @@ public class HomeController {
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
 
+        //added the following to display the view template:
+        Optional optJob = jobRepository.findById(jobId);
+        if (optJob.isPresent()) {
+            Job job = (Job) optJob.get();
+            model.addAttribute("job", job);
             return "view";
+        } else {
+            return "redirect::";
+        }
+
+            //return "view";
     }
 
 }
